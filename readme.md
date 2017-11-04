@@ -92,27 +92,9 @@ If your code calls `window.pushState()` ModernHistory.js will fail.
 
 ## Demo
 
-Open the developer console, and watch the output as you click the buttons below!
-
-<ol>
-    <li>Click an anchor link:
-        <a href="#a">a</a> -
-        <a href="#b">b</a>
-    </li>
-    <li>Call pushState:
-        <button onclick="ModernHistory.addState('c', {a:1, b:2})">c</button> -
-        <button onclick="ModernHistory.addState('d', {c:3, d:4})">d</button>
-    </li>
-    <li>Click the back button:
-        <button onclick="window.history.back()">←</button>
-    </li>
-    <li>Click the forward button:
-        <button onclick="window.history.forward()">→</button>
-    </li>
-    <li>Refresh the browser:
-        <button onclick="window.location.reload(false)">⟳</button>
-    </li>
-</ol>
+GitHub Markdown strips JavaScript, so I'll need to figure out a better way to demo this. *Coming Soon*.
+In the meantime, you can checkout the project and load [index.html](index.html) in your favorite browser
+to demo it.
 
 ## Known Issues
 
@@ -134,25 +116,3 @@ I've settled on grabbing all past states and recovering future states as the use
 can grow even without you calling `addState()`!
 
 *Josh Rehman, Oct 2017*
-
-<script src="modernhistory.js"></script>
-<script>
-    ModernHistory.debug = false;
-
-    window.addEventListener('ModernHistory.add', e =>{
-        console.log('add', ModernHistory.state, ModernHistory.state.detail);
-    });
-    window.addEventListener('ModernHistory.move', e =>{
-        console.log('mov', ModernHistory.state, ModernHistory.state.detail);
-    });
-    window.addEventListener('ModernHistory.forward', e =>{
-        console.log('for', ModernHistory.state, ModernHistory.state.detail);
-    });
-    window.addEventListener('ModernHistory.back', e =>{
-        console.log('bak', ModernHistory.state, ModernHistory.state.detail);
-    });
-    window.addEventListener('ModernHistory.recoverState', e =>{
-        console.log('rec', ModernHistory.state, ModernHistory.state.detail);
-    });
-
-</script>
