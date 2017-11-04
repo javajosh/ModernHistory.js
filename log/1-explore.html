@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History</title>
+</head>
+<body>
+
+<h1 id="back_button">History and The Back Button</h1>
+<p>
+    Using the web, you start with a name, the URL. Then in the steady-state, you read the result and click
+    on a link, creating the steady-state loop we call "browsing". The browser keeps track of where
+    you've been (you're history), and allows you to move back and forth through that history with the
+    <i>back</i> and <i>forward</i> buttons. When the browser dumps a page and loads a new one, it's
+    called a <code>navigation</code>. A Single Page Application (SPA) doesn't need to move around <i>resources</i>
+    like an old-school application, and does no 'navigation' at all! The simplest option is to give up
+    the back-button, and at most protect users from making a mistake with the <code>window.onunload</code>
+    handler to stop them from leaving a stateful page. If that's not an option then use
+    <code>window.pushState()</code> and <code>window.onpopstate</code>, which are powerful footguns!
+</p>
+
+<p>
+    Let's say your SPA is accessed during a user browsing session. The user accesses R resources,
+    then your SPA gets loaded, contributes N new history states, and then the user leaves to go somewhere else.
+    In the simplest case the N states only grows. N can shrink if the user <i>invalidates</i> their timeline
+    by going back several states, and picking a new path. Those N new states come from a combination
+    of <i>anchor link clicks</i>, explicit <code>window.location.hash</code> assignments, and
+    explicit <code>pushState()</code> calls. The back-button moves back in the timeline, the forward button
+    forward on the timeline.
+</p>
+
+<p>
+    Hash link:
+    <a href="#a">a</a>
+    <a href="#b">b</a>
+    Set hash:
+    <button onclick="location.hash='c'">c</button>
+    <button onclick="location.hash='d'">d</button>
+    Pushstate:
+    <button onclick="history.pushState('e', null)">e</button>
+    <button onclick="history.pushState('e', null)">f</button>
+    History.length:
+    <button onclick="console.log(history.length)">check</button>
+</p>
+<script>
+    let n = 0;
+
+    window.onpopstate = e => {
+        console.debug(++n, e);
+    }
+    window.onhashchange = e => {
+        console.debug(++n, e);
+    }
+
+</script>
+
+<p>Click around, and observe:</p>
+<ol>
+    <li>history.length doesn't increase unless the hash actually changes</li>
+    <li>history.length always increases on pushstate</li>
+    <li>history.length doesn't decreaase with the back button</li>
+    <li>history.length doesn't increase with the forward button</li>
+    <li>history.length <b>does</b> decrease with the back-button and a new state</li>
+    <li>window.onpopstate is called by the back-button and the forward button</li>
+    <li>window.onpopstate is called when we change the hash</li>
+    <li>window.onpopstate is <b>not</b> called when we call pushState</li>
+</ol>
+
+<p>
+    onpopstate is poorly named because it implies that history is changing. but it can mean
+    we're moving around the timeline, or it could mean we're adding a new state (with an anchor link).
+    And by default it doesn't record pushState(). So, what we need is a) a reliable way to detect when
+    window.history.length changes, and b) detect when the user moves within this history using forward and back.
+    We can do this by a) not calling pushState directly, and b) factoring-out anchor-triggered popstateevents.
+    We can detect anchor-caused popstateevents by checking the event <code>state</code>, which is null. We
+    don't call pushState directly, instead using a proxy function. Not sure how to detect which direction
+    we are moving!
+</p>
+
+<p>See <a href="history2.html">history2.html</a> for how I dealt with this.</p>
+
+<h3>Reference</h3>
+
+<ol>
+    <li><code>window.onload</code> Event called when the document finishes loading.</li>
+    <li><code>window.onunload</code> Event called when you leave a document.</li>
+    <li><code>window.history</code> Methods for moving <code>back()</code> and <code>forward()</code></li>
+    <li><code>window.location</code> Parsed URL; set to a URL to trigger navigation.</li>
+    <li><code>document.referrer</code> String set to the window.location before navigation.</li>
+    <li><code>window.onhashchange</code> Old-school event, replaced by onpopstate, below.</li>
+    <li><code>window.onpopstate</code> New event, called by clicking on anchor links <i>and</i> forward, back</li>
+</ol>
+
+<p>Related links</p>
+<pre>
+    MDN
+    https://developer.mozilla.org/en-US/docs/Web/API/History_API
+    https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events
+
+    Stack overflow
+    https://stackoverflow.com/questions/3715047/how-to-reload-a-page-using-javascript
+    https://stackoverflow.com/questions/42034533/how-to-detect-is-that-back-button-or-forward-button-clicked-by-javascript
+    https://stackoverflow.com/questions/8980255/how-do-i-retrieve-if-the-popstate-event-comes-from-back-or-forward-actions-with
+    https://stackoverflow.com/questions/298503/how-can-you-check-for-a-hash-in-a-url-using-javascript
+    https://stackoverflow.com/questions/14586045/detecting-browser-history-actions
+    https://stackoverflow.com/questions/26147580/window-onpopstate-its-activated-with-all-href-links
+    https://stackoverflow.com/questions/5129386/how-to-detect-when-history-pushstate-and-history-replacestate-are-used
+    https://stackoverflow.com/questions/9340121/which-one-is-better-pushstate-or-location-hash
+    https://stackoverflow.com/questions/3009380/whats-the-shebang-hashbang-in-facebook-and-new-twitter-urls-for
+
+    Other
+    https://github.com/browserstate/history.js
+    https://gist.github.com/tobytailor/1164818
+    https://webmasters.googleblog.com/2015/10/deprecating-our-ajax-crawling-scheme.html
+    https://www.quirksmode.org/js/introevents.html
+    https://www.quirksmode.org/js/events_order.html
+
+
+</pre>
+
+
+</body>
+</html>

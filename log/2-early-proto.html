@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History</title>
+</head>
+<body>
+
+<h1 id="history">The Back Button and Browser History</h1>
+
+<p>What follows is an attempt to accurately model an <i>SPA timeline</i> using modern browser API. It is a
+    continuation of <a href="history.html">history.html</a>. The user can interact with the browser in 4 ways
+    to affect their timeline:</p>
+
+<ol>
+    <li>Click an anchor link: <a href="#a">a</a> - <a href="#b">b</a></li>
+    <li>Call pushState: <button onclick="addState('c')">c</button></li>
+    <li>Call pushState: <button onclick="addState('d')">d</button></li>
+    <li>Click the back button: <button onclick="window.history.back()">←</button></li>
+    <li>Click the forward button: <button onclick="window.history.forward()">→</button></li>
+</ol>
+
+<p>Rules:</p>
+<ol>
+    <li>If you never hit the back button, anchors and pushstate add one state the timeline.</li>
+    <li>If you hit the back button, anchor and pushstate delete the remaining timeline and then add one item.</li>
+    <li>If you hit the back button beyond the first state, you leave the page.</li>
+    <li>If you hit the forward button beyond the last state, you leave the page.</li>
+</ol>
+
+<p>Complications:</p>
+<ol>
+    <li>Both the back button and the forward button trigger onpopstate</li>
+    <li>Clicking a new anchor triggers onpopstate</li>
+    <li>There is no way to detect pushState()</li>
+</ol>
+
+<p>There is no way to distinguish between forward, back, or an anchor click within onpopstate. There is
+no way to detect pushState. This is remarkably bad API design.</p>
+
+<p>The first thing we do is normalize anchor clicks and pushState calls so that they both go through a proxy function.
+This allows us to associate a custom state object with anchor clicks, which usually have a null state object. The
+downside is that a) we must remember to call this special function (called <code>addState()</code>) and b) we must
+register a click handler at the top-level to intercept hash changes before they happen.</p>
+
+<p>An important piece of data is to see how window.history.length changes over time. If it increases
+we know that a new state was added. If it decreases, we know a new state was added in the past. If it
+stays the same, then we have moved within the timeline. If we've moved in the timeline, we can determine
+forward or backward motion by comparing the current state with both the previous and next states in the timeline.</p>
+
+<p>To simplify, normalize anchor clicks through pushState by using a click handler.</p>
+
+<h3>Beyond the protoype</h3>
+<p>This prototype is not ready to be used with real code, particularly because it pollutes the namespace. The plan is to
+encapsulate it into a singleton object called "TimeLine" in a "timeline.js" file. The user would have to call TimeLine.start()
+for it to take effect. It would sit and observe, and so emit events via a callback. It would also expose methods for moving
+around, and moving to a specific state in the timeline.</p>
+
+<script>
+    /**
+     * This is very basic prototype code, not for production.
+     *
+     */
+    const R = window.history.length - 1;
+    const initialState = {id: 0, label:'start', timestamp: Date.now()};
+    const timeLine = [initialState];
+    let pos = 0;
+    window.history.replaceState(initialState, '');
+//    window.history.go(-1);
+
+    // Wrapper function for pushState
+    const addState = label => {
+        // Skip state transitions to the same label
+        if (label === timeLine[pos].label){
+            console.log('duplicate label detected, skipping', label);
+            return;
+        }
+
+        // Handle the case of adding events in the past, which deletes the remaining timeline
+        if (pos < timeLine.length -1){
+            timeLine.splice(pos + 1, timeLine.length -1);
+        }
+        // Construct an event, add it to our timeLine, add to window.history, and increment the position.
+        let state = {id: timeLine.length, label, timestamp: Date.now()};
+        timeLine.push(state);
+        window.history.pushState(state, null, '#' + label);
+        pos++;
+        console.log(timeLine, pos);
+    }
+
+    // Capture all hash clicks and redirect them.
+    window.onclick = e => {
+        if (e.srcElement.tagName === 'A'){
+            let a = e.srcElement;
+            let parts = a.href.split('#');
+            if (parts.length > 1){
+                let hash = parts[1];
+                console.log('hash click detected', '#' + hash);
+                addState(hash);
+                return false;
+            }
+        }
+    }
+
+    // Use onpopstate to detect forward and back presses
+    window.onpopstate = e => {
+        let index = e.state.id;
+        let dir = '';
+        if (index > pos){
+            dir = 'forward';
+        } else if (index < pos) {
+            dir = 'back';
+        } else {
+            dir = 'no change';
+        }
+        //here is where event dispatch would go
+        console.log('(pos, index, dir, label)', pos, index, dir, e.state.label);
+        pos = index;
+    }
+</script>
+<p><i>Josh Rehman, Oct 2017</i></p>
+</body>
+</html>

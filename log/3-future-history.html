@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History</title>
+</head>
+<body>
+
+<h1 id="history">ModernHistory - The Recovering Future History after Refresh Problem</h1>
+
+<p>
+    ModernHistory.js is a javascript library to help single-page application (SPA) authors interact with browser
+    history in a useful way. It works by observing programmer and user actions to build an image of all
+    accessible states, in the past and the future. When the browser refreshes, history is preserved
+    in the browser, but lost in ModernHistory's state, so we have to recover it. This problem is only
+    visible when a user builds state, moves back into the middle of the state, and then refreshes the browser.
+</p>
+
+<p>
+    Recovering <i>future history</i> after a refresh should be a simple problem. One solution, the first
+    I tried, was to form a doubly-linked list out of states using <code>nextState</code> and <code>prevState</code>.
+    Then we can reach all states from the initial one. When I tried this, the browser literally <i>deleted</i> the
+    <code>nextState</code> property of the initial state! So I could access states in the past, but not in the
+    future. The user, however, could still click the forward button. The best I could do was fix up <code>timeLine</code>
+    with these newly discovered states.
+</p>
+
+<p>
+    Another way to recover future history after refresh would be to store a reference to the entire timeLine
+    which each state. Somehow, again, the browser deleted this property of all states.
+</p>
+
+<p>
+    Another way, which I attempted but I don't think it really worked, is to store the length of the timeLine,
+    infer the length of <i>future history</i> from that, programmatically move forward and stash the states
+    into the timeLine. I didn't pursue this because applications, in general, do side-effects on state
+    changes and I think it's a bad idea to move around states like this. So I didn't pursue it.
+</p>
+
+
+<h2>Steps to Reproduce</h2>
+
+<p>Open the developer console, and watch the output as you click the buttons below!</p>
+
+<ol>
+    <li>addState() <button onclick="ModernHistory.addState('a')">a</button> </li>
+    <li>addState() <button onclick="ModernHistory.addState('b')">b</button> </li>
+    <li>addState() <button onclick="ModernHistory.addState('c')">c</button> </li>
+    <li>Pause here to check that <code>ModernHistory.timeLine.length = 3</code>, and
+        <code>window.history.state.nextState</code> exists
+    </li>
+    <li>back() <button onclick="window.history.back()">←</button></li>
+    <li>reload() <button onclick="window.location.reload(false)">⟳</button></li>
+    <li>Pause here to check that <code>ModernHistory.timeLine.length = 2</code>, and
+        <code>window.history.state.nextState</code> does <i><b>not</b></i> exist!
+    </li>
+</ol>
+
+<p>
+    Observe that <code>ModernHistory.timeLine.length = 2</code>. The expected result is that
+    <code>ModernHistory.timeLine.length = 3</code>. If you look more closely, you'll see that
+    <code>ModernHistory.state.prevState</code> exists, but <code>ModernHistory.state.nextState</code>
+    does not. The expected result is that both properties exist.
+</p>
+
+
+<p><i>Josh Rehman, Oct 2017</i></p>
+
+<script src="modernhistory.js"></script>
+<script>
+    ModernHistory.debug = true;
+
+</script>
+</body>
+</html>
