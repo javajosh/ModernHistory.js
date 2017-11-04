@@ -3,7 +3,7 @@
 ModernHistory.js is a javascript library to smooth over a tricky part of the browser history API
 using minimal, readable, modern JavaScript (ES6) that has no dependencies. A non-goal is to provide a
 library that can provide history services for older browsers (a polyfill). If you want a polyfill,
-take a look at <a href="https://github.com/browserstate/history.js">history.js</a>.
+take a look at [history.js](https://github.com/browserstate/history.js).
 
 ModernHistory deals correctly with hash clicks (anchor links), pushState, and browser refresh.
 See below for a demo.
@@ -38,12 +38,10 @@ Your code uses ModernHistory.js like this:
     </script>
 ```
 
-</pre>
 
-There are a lot of subtle issues (covered in <a href="history.html">history</a> and
-<a href="history2.html">history2</a>), but the basic idea is to <i>normalize</i> all the ways programs
-can interact with history, and offer a better <i>representation</i> of history state. The representation
-is called <code>ModernHistory</code> and it is a global object you can inspect directly, and it might
+There are a lot of subtle issues (covered in [log](/log)), but the basic idea is to *normalize* all the ways programs
+can interact with history, and offer a better *representation* of history state. The representation
+is called `ModernHistory` and it is a global object you can inspect directly, and it might
 look something like this:
 
 ```js
@@ -76,8 +74,8 @@ state = {
 
 
 ### Limitations
-Unfortunately, there is no way to allow application code to call <code>window.history.pushState()</code>
-directly. This is because there is no <code>onpushstate</code> event defined in the DOM.
+Unfortunately, there is no way to allow application code to call `window.history.pushState()`
+directly. This is because there is no `onpushstate` event defined in the DOM.
 (There may be a way by replacing the function outright, but I am hesitant to modify standard DOM objects
 like this. Another option is to write a Proxy around the function, which is something I may explore later.)
 
@@ -85,11 +83,11 @@ Prefer to use the ModernHistory events rather than onpopstate, since onpopstate
 is a much lower-level event, and can mean any of: forward, back, or adding a hash click. ModernHistory
 differentiates between these cases, and provides a context for understanding what's going on.
 
-If your code calls <code>window.pushState()</code> ModernHistory.js will fail.
+If your code calls `window.pushState()` ModernHistory.js will fail.
 
 ### Ideas!
   1. Keep track of a tree of history.
-  2. Wrap <code>pushState()</code> in a proxy to create <code>onpushstate</code>
+  2. Wrap `pushState()` in a proxy to create `onpushstate`
   3. Investigate how and why the browser removes references to future history after refresh.
 
 ## Demo
@@ -125,15 +123,15 @@ serious voodoo magic! I'd also like to detect pushState with a proxy, and the sc
 packaging idiom love from the community.
 
 Truth is this script was a lot simpler before I realized I needed to handle <i>browser refresh</i> . Refresh nukes
-all program state, which in this case means the <code>timeLine</code>, but the browser tab still
+all program state, which in this case means the `timeLine`, but the browser tab still
 maintains history state knows about forward and back history; a somewhat elegant solution
 to this inelegant problem was to form a doubly-linked list between states, and walk through them all
 on page load, and rebuild the timeLine. However, this mysteriously failed, because all references to future
 states were removed during the refresh. It doesn't seem like a logic error on my part, but rather some
 fancy browser engine thing that hides information from the page. After exploring some possibilities,
 I've settled on grabbing all past states and recovering future states as the user visits them again.
-(This is why <code>isRefresh=true</code> means that the <code>timeLine</code> may be incomplete, and in fact
-can grow even without you calling <code>addState()</code>!
+(This is why `isRefresh=true` means that the `timeLine` may be incomplete, and in fact
+can grow even without you calling `addState()`!
 
 *Josh Rehman, Oct 2017*
 
