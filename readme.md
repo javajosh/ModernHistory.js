@@ -1,6 +1,6 @@
 # ModernHistory.js
 
-ModernHistory.js is a javascript library to smooth over a tricky part of the browser history API
+[ModernHistory.js](http://javajosh.com/ModernHistory.js/) is a javascript library to smooth over a tricky part of the browser history API
 using minimal, readable, modern JavaScript (ES6) that has no dependencies. A non-goal is to provide a
 library that can provide history services for older browsers (a polyfill). If you want a polyfill,
 take a look at [history.js](https://github.com/browserstate/history.js).
@@ -92,9 +92,8 @@ If your code calls `window.pushState()` ModernHistory.js will fail.
 
 ## Demo
 
-GitHub Markdown strips JavaScript, so I'll need to figure out a better way to demo this. *Coming Soon*.
-In the meantime, you can checkout the project and load [index.html](index.html) in your favorite browser
-to demo it.
+GitHub Markdown strips JavaScript, so load the demo by going to the 
+[ModernHistory.js Homepage](http://javajosh.com/ModernHistory.js/)
 
 ## Known Issues
 
